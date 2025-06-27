@@ -27,6 +27,14 @@
             >
               删除订阅
             </el-button>
+            <el-button 
+              type="success"
+              size="small"
+              @click="toggleCourseInfo"
+              style="margin-left: 8px;"
+            >
+              {{ courseInfoEnabled ? '取消课程信息' : '获取课程信息' }}
+            </el-button>
           </div>
         </div>
         <div class="subscription-info">
@@ -52,18 +60,28 @@ import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getSubscriptions, deleteSubscription, updateSubscriptionEmails } from '../api/jobs'
 import { cityOptions } from '../api/cityData'
+import { fetchAllCourses } from '../api/course'
 import EmailManager from './EmailManager.vue'
 
 const props = defineProps({
-  modelValue: Boolean
+  modelValue: Boolean,
+  courseInfoEnabled: Boolean,
+  courseInfo: Object
 })
-
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:courseInfoEnabled', 'update:courseInfo'])
 
 const subscriptions = ref([])
 const showEmailEditor = ref(false)
 const currentSubscription = ref(null)
 const currentEmails = ref([])
+const courseInfoEnabled = computed({
+  get: () => props.courseInfoEnabled,
+  set: (val) => emit('update:courseInfoEnabled', val)
+})
+const courseInfo = computed({
+  get: () => props.courseInfo,
+  set: (val) => emit('update:courseInfo', val)
+})
 
 const dialogVisible = computed({
   get: () => props.modelValue,
@@ -144,6 +162,22 @@ const handleEmailsSave = async (emails) => {
   }
 }
 
+// 切换课程信息获取
+async function toggleCourseInfo() {
+  courseInfoEnabled.value = !courseInfoEnabled.value
+  if (courseInfoEnabled.value && !courseInfo.value) {
+    try {
+      courseInfo.value = await fetchAllCourses()
+      ElMessage.success('课程信息已获取，将在AI对话中使用')
+    } catch (e) {
+      ElMessage.error('获取课程信息失败')
+      courseInfoEnabled.value = false
+    }
+  } else if (!courseInfoEnabled.value) {
+    ElMessage.info('已取消在AI对话中使用课程信息')
+  }
+}
+
 // 监听对话框打开
 watch(() => dialogVisible.value, (val) => {
   if (val) {
@@ -188,4 +222,4 @@ watch(() => dialogVisible.value, (val) => {
   display: flex;
   gap: 8px;
 }
-</style> 
+</style>

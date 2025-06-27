@@ -101,10 +101,24 @@
                 {{ subscribing ? '订阅中...' : '订阅' }}
               </el-button>
               <el-button 
+                type="warning" 
+                @click="showAIChatPanel = true"
+                :disabled="!jobs.length"
+              >
+                AI咨询
+              </el-button>
+              <el-button 
                 type="info" 
                 @click="showSubscriptionManager = true"
               >
                 我的订阅
+              </el-button>
+              <el-button 
+                type="success"
+                @click="toggleCourseInfo"
+                style="margin-left: 8px;"
+              >
+                {{ courseInfoEnabled ? '取消课程信息' : '获取课程信息' }}
               </el-button>
             </el-form-item>
           </el-col>
@@ -137,6 +151,19 @@
     <!-- 订阅管理器 -->
     <subscription-manager
       v-model="showSubscriptionManager"
+      :course-info-enabled="courseInfoEnabled"
+      :course-info="courseInfo"
+      @update:course-info-enabled="val => courseInfoEnabled = val"
+      @update:course-info="val => courseInfo = val"
+    />
+
+    <AIChatPanel
+      v-if="showAIChatPanel"
+      :visible="showAIChatPanel"
+      :jobData="jobs"
+      :course-info-enabled="courseInfoEnabled"
+      :course-info="courseInfo"
+      @close="showAIChatPanel = false"
     />
   </div>
 </template>
@@ -149,6 +176,7 @@ import { searchJobs, subscribeJobs, cityGroups, hotCities, cityOptions } from '.
 import JobList from './JobList.vue'
 import EmailManager from './EmailManager.vue'
 import SubscriptionManager from './SubscriptionManager.vue'
+import AIChatPanel from './AIChatPanel.vue'
 
 const searchForm = reactive({
   query: '',
@@ -329,6 +357,28 @@ watch([() => searchForm.query, () => searchForm.city], () => {
 })
 
 const showSubscriptionManager = ref(false)
+const showAIChatPanel = ref(false)
+
+// 课程信息相关状态
+const courseInfoEnabled = ref(false)
+const courseInfo = ref(null)
+
+// 切换课程信息获取
+const toggleCourseInfo = async () => {
+  courseInfoEnabled.value = !courseInfoEnabled.value
+  if (courseInfoEnabled.value && !courseInfo.value) {
+    try {
+      const { fetchAllCourses } = await import('../api/course')
+      courseInfo.value = await fetchAllCourses()
+      ElMessage.success('课程信息已获取，将在AI对话中使用')
+    } catch (e) {
+      ElMessage.error('获取课程信息失败')
+      courseInfoEnabled.value = false
+    }
+  } else if (!courseInfoEnabled.value) {
+    ElMessage.info('已取消在AI对话中使用课程信息')
+  }
+}
 </script>
 
 <style scoped>
@@ -511,4 +561,4 @@ const showSubscriptionManager = ref(false)
   color: #fff;
   background: #1890ff;
 }
-</style> 
+</style>

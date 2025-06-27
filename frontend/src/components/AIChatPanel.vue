@@ -83,7 +83,9 @@ const props = defineProps({
   jobData: {
     type: Object,
     default: () => ({})
-  }
+  },
+  courseInfoEnabled: Boolean,
+  courseInfo: Object
 })
 
 const emit = defineEmits(['close'])
@@ -200,7 +202,8 @@ async function sendMessage() {
         tags: job.tags || [],
         location: job.location || '未知地点'
       })),
-      totalCount: props.jobData.length
+      totalCount: props.jobData.length,
+      courseInfo: props.courseInfoEnabled ? props.courseInfo : undefined
     }
     
     let assistantMessageIndex = -1

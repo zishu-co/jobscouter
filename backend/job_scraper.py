@@ -103,7 +103,7 @@ class JobScraper:
             try:
                 # 先等待职位列表或空结果出现
                 wait.until(lambda driver: 
-                    len(driver.find_elements(By.CLASS_NAME, "job-card-wrapper")) > 0 or 
+                    len(driver.find_elements(By.CLASS_NAME, "job-card-box")) > 0 or 
                     len(driver.find_elements(By.CLASS_NAME, "job-empty-wrapper")) > 0 or
                     len(driver.find_elements(By.CLASS_NAME, "wrap-verify-slider")) > 0
                 )
@@ -115,17 +115,17 @@ class JobScraper:
                     return { "status": "verify", "data": [] }
                 
                 # 检查是否有职位列表
-                job_cards = self._driver.find_elements(By.CLASS_NAME, "job-card-wrapper")
+                job_cards = self._driver.find_elements(By.CLASS_NAME, "job-card-box")
                 if job_cards and len(job_cards) > 0:
                     # 提取职位数据
                     jobs_data = self._driver.execute_script("""
-                        return Array.from(document.querySelectorAll('.job-card-wrapper')).map(card => ({
-                            title: card.querySelector('.job-name').textContent.trim(),
-                            salary: card.querySelector('.salary').textContent.trim(),
-                            company: card.querySelector('.company-name').textContent.trim(),
-                            location: card.querySelector('.job-area').textContent.trim(),
-                            tags: Array.from(card.querySelector('.tag-list').querySelectorAll('li')).map(li => li.textContent.trim()),
-                            job_link: card.querySelector('a.job-card-left').href
+                        return Array.from(document.querySelectorAll('.job-card-box')).map(card => ({
+                            title: card.querySelector('.job-name')?.textContent.trim() || '',
+                            salary: card.querySelector('.job-salary')?.textContent.trim() || '',
+                            company: card.querySelector('.boss-name')?.textContent.trim() || '',
+                            location: card.querySelector('.company-location')?.textContent.trim() || '',
+                            tags: Array.from(card.querySelectorAll('.tag-list li')).map(li => li.textContent.trim()),
+                            job_link: card.querySelector('.job-name')?.href || ''
                         }));
                     """)
                     

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // DeepSeek API configuration
 const AI_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-const API_KEY = 'sk-73d7431266084e6bbc3eab3deb414cd6' // Consider using environment variables
+const API_KEY = '' // Consider using environment variables
 
 // Create a messages history store - can be expanded to support multiple conversations
 const conversationStore = new Map();

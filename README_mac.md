@@ -205,6 +205,8 @@ pip install -r requirements.txt
 # 配置邮箱
 cp .env.example .env
 # 编辑 .env 文件，填入正确的邮箱 SMTP 配置
+
+# 填写ai.js文件中的API_KEY
 ```
 
 
